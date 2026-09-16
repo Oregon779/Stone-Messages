@@ -1,7 +1,7 @@
 name: StoneMessage
 version: '1.0.0'
 main: dev.stonemessage.plugin.StoneMessage
-api-version: '1.21'
+api-version: '26.2'
 author: Stone Plugins
 description: Stone Message replaces the vanilla join and leave messages with fully configurable, multi-channel, placeholder-aware custom messages.
 folia-supported: false

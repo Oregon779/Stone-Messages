@@ -15,8 +15,9 @@
     </description>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <!-- Portage to Paper API 26.2 / Java 25 -->
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -37,10 +38,11 @@
 
     <dependencies>
         <!-- Paper API is provided by the server at runtime (includes Adventure and Gson) -->
+        <!-- Pinned to a fixed stable build (not an open version range) for the 26.2 portage -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <version>26.2.build.124-stable</version>
             <scope>provided</scope>
         </dependency>
         <!-- Soft dependency: only used if the server has LuckPerms installed -->
@@ -68,7 +70,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>21</release>
+                    <!-- Portage to Paper API 26.2 / Java 25 -->
+                    <release>25</release>
                 </configuration>
             </plugin>
             <plugin>
