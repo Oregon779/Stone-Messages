@@ -1,0 +1,19 @@
+name: StoneMessage
+version: '1.0.0'
+main: dev.stonemessage.plugin.StoneMessage
+api-version: '1.21'
+author: Stone Plugins
+description: Stone Message replaces the vanilla join and leave messages with fully configurable, multi-channel, placeholder-aware custom messages.
+folia-supported: false
+softdepend: [LuckPerms, PlaceholderAPI]
+
+commands:
+  stonemessage:
+    description: Main Stone Message command for reloading the plugin and viewing help.
+    usage: /stonemessage <reload|help|checkupdate>
+    aliases: [sm, stonemsg]
+
+permissions:
+  stonemessage.admin:
+    description: Access to all Stone Message admin actions (reload, checkupdate, update notifications).
+    default: op

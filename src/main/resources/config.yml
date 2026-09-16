@@ -1,0 +1,122 @@
+# =====================================================================
+#                       Stone Message - config.yml
+#                        A plugin by Stone Plugins
+# =====================================================================
+#
+# This file contains SETTINGS (switches, channels, timings) as well as
+# the actual join/leave text itself - both live here (not in
+# messages.yml) so the whole "what does a join/leave look like"
+# experience is configured in one single place.
+#
+# Text for every channel (chat/actionbar/title+subtitle) stays filled in
+# under "messages" at the same time - the "notification" field just
+# picks which ONE of them is actually shown, so you can change your mind
+# later without having to write the text again.
+#
+# General command feedback (help, reload, errors, ...) is translated
+# per-language instead, in:
+#   plugins/Stone Message/languages/<language>/messages.yml
+#
+# ---------------------------------------------------------------------
+# Available placeholders (usable in every message below):
+#   {player}          - the player's name
+#   {displayname}      - the player's display name (nickname/prefix aware)
+#   {uuid}             - the player's UUID
+#   {world}            - the world the player is in
+#   {x} {y} {z}        - the player's block coordinates
+#   {online}           - players currently online
+#   {max}              - the server's player slot limit
+#   {ping}             - the player's current ping in milliseconds
+#   {gamemode}         - the player's current game mode (SURVIVAL, CREATIVE, ...)
+#   {tps}              - the server's current ticks-per-second
+#   {server_name}      - the server's MOTD
+#   {last_seen_date}   - only in join messages: formatted date/time the
+#                         player was last online (see date-format below,
+#                         empty on a player's very first join)
+#   {first_join_date}  - formatted date/time this player first ever joined
+#   {days_offline}     - only in join messages: full days since this player
+#                         was last online (0 if less than a day, first join
+#                         has no meaningful value and is best avoided there)
+#   {hours_offline}    - only in join messages: hours since last online,
+#                         useful for a more precise message than days
+#   {prefix}           - the player's LuckPerms prefix (empty if LuckPerms
+#                         isn't installed)
+#   {suffix}           - the player's LuckPerms suffix (empty if LuckPerms
+#                         isn't installed)
+#   {rank}             - the player's primary LuckPerms group, e.g. "admin"
+#                         (empty if LuckPerms isn't installed)
+#
+# If PlaceholderAPI is installed, any %placeholder% (LuckPerms, Vault, or
+# any other expansion you have) also works directly in every message below -
+# no extra setup needed, it's just resolved automatically.
+# ---------------------------------------------------------------------
+#
+# Missing options are added automatically on plugin updates. Existing
+# values you changed are never overwritten, even in nested sections.
+# =====================================================================
+
+# Language used for general command feedback. Must match a folder under
+# languages/ - "en" and "de" ship by default. New installs always default
+# to English until an admin changes this.
+language: en
+
+# Pattern used to render {last_seen_date} and {first_join_date}, following
+# Java's SimpleDateFormat syntax (e.g. "dd.MM.yyyy HH:mm" -> 28.07.2026 14:05).
+date-format: "dd.MM.yyyy HH:mm"
+
+# ---------- JOIN ----------
+join:
+  # Replace the vanilla "Player joined the game" message with the text below.
+  # If false, no join message is shown at all (vanilla one stays hidden either way).
+  enabled: true
+
+  # Where the join message is shown. CHAT, ACTIONBAR or TITLE.
+  notification: CHAT
+
+  # Text for every channel - only the one picked above is actually used.
+  # TITLE uses "title" + "subtitle" together.
+  messages:
+    chat: "&8[&a+&8] &a{player} &7joined the game. &8(&7{online}&8/&7{max}&8)"
+    actionbar: "&a➜ {player} joined the game"
+    title: "&a&l{player}"
+    subtitle: "&7joined the game"
+
+  # A separate, one-time message shown the very first time a player ever
+  # joins the server - great for a personal welcome. Uses the same
+  # notification channel as above (join.notification).
+  first-join:
+    enabled: true
+    messages:
+      chat: "&8[&e★&8] &eWelcome, &f{player}&e, this is your first time here!"
+      actionbar: "&e★ Welcome, {player}!"
+      title: "&e&lWelcome!"
+      subtitle: "&7{player}, enjoy your stay"
+
+# ---------- LEAVE ----------
+leave:
+  # Replace the vanilla "Player left the game" message with the text below.
+  enabled: true
+
+  # Where the leave message is shown. CHAT, ACTIONBAR or TITLE.
+  notification: CHAT
+
+  # Text for every channel - only the one picked above is actually used.
+  messages:
+    chat: "&8[&c-&8] &c{player} &7left the game. &8(&7{online}&8/&7{max}&8)"
+    actionbar: "&c➜ {player} left the game"
+    title: "&c&l{player}"
+    subtitle: "&7left the game"
+
+# Shared Title timing, used whenever a "notification" above is TITLE.
+title-timing:
+  fade-in-ticks: 5
+  stay-ticks: 40
+  fade-out-ticks: 10
+
+# Checks https://modrinth.com/project/stone-message for a newer plugin
+# version. Console feedback is always printed once right on startup. If
+# a newer version is found, everyone with stonemessage.admin (or OP) is
+# reminded every time they join, until the plugin is updated.
+update-checker:
+  enabled: true
+  check-interval-minutes: 60

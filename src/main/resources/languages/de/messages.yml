@@ -1,0 +1,32 @@
+# =====================================================================
+# Stone Message Nachrichten (Deutsch)
+#
+# Unterstützte Farbformate, gleichzeitig nutzbar in jeder Nachricht:
+#   &-Codes        z.B. &a, &b, &l
+#   Hex-Farben     z.B. &#FF00AA
+#   MiniMessage    z.B. <gradient:#ff0000:#0000ff>text</gradient>
+#
+# Hinweis: Der eigentliche Join-/Leave-Nachrichtentext steht in der
+# config.yml (join.messages.* / leave.messages.* /
+# join.first-join.messages.*), da dort auch festgelegt wird, WIE die
+# Nachricht angezeigt wird.
+# =====================================================================
+
+prefix: "&l&8[&7Stone &e&lMessage&8]&r "
+
+general:
+  no-permission: "&c✖ Du hast keine Berechtigung dafür."
+  reload-success: "&a✔ Konfiguration und Nachrichten wurden neu geladen."
+
+help:
+  header: "<gradient:#9AA5B1:#FFC24A><bold>▬▬▬▬▬ Stone Message Hilfe ▬▬▬▬▬</bold></gradient>"
+  reload: "&e/stonemessage reload &8» &7Konfiguration und Nachrichten neu laden"
+  checkupdate: "&e/stonemessage checkupdate &8» &7Jetzt sofort auf Modrinth nach einer neuen Version suchen"
+  help: "&e/stonemessage help &8» &7Dieses Hilfemenü anzeigen"
+
+update:
+  # {version} {current} {behind}
+  available: "&l&8[&7Stone &e&lMessage&8]&r &fEine neue Version ist verfügbar: &a{version} &7(du nutzt &c{current}&7, &e{behind} &7dahinter). Auf Modrinth aktualisieren."
+  versions-behind: "{count} Version(en)"
+  versions-behind-unknown: "einer unbekannten Anzahl an Versionen"
+  check-triggered: "&e⟳ &7Suche jetzt auf Modrinth nach Updates... &8Ergebnis erscheint in der Konsole."
