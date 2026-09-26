@@ -59,6 +59,19 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- MockBukkit was evaluated for these tests but its published releases have no
+             bundled Minecraft registry data for this sandbox's synthetic Paper 26.2 build
+             (confirmed: MockBukkit's own RegistryAccessMock throws "Null JSON element
+             while retrieving `minecraft:point_of_interest_type` - MockBukkit / MC version
+             mismatch?"), so ServerMock can never initialize here. The tests below exercise
+             the same fixed logic directly instead, without needing a live Bukkit server. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>6.0.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

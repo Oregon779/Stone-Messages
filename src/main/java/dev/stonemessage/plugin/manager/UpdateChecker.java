@@ -21,6 +21,7 @@ public class UpdateChecker implements Listener {
     private static final String MODRINTH_PROJECT_SLUG = "stone-message";
 
     private final StoneMessage plugin;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     private BukkitTask task;
     private volatile String latestKnownVersion = null;
     private volatile int versionsBehind = -1;
@@ -53,14 +54,13 @@ public class UpdateChecker implements Listener {
 
     private void check() {
         try {
-            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.modrinth.com/v2/project/" + MODRINTH_PROJECT_SLUG + "/version"))
                     .timeout(Duration.ofSeconds(10))
                     .header("User-Agent", "StonePlugins/StoneMessage update-checker")
                     .GET()
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 plugin.getLogger().warning("Update checker: Modrinth responded with status " + response.statusCode() + " for project '" + MODRINTH_PROJECT_SLUG + "'.");

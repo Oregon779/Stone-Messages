@@ -117,6 +117,23 @@ public class MessageManager {
         return result;
     }
 
+    // Same substitution as applyPlaceholders(), but each value is escaped first so
+    // dynamic, potentially player-controlled content (nicknames/{displayname}, LuckPerms
+    // {prefix}/{suffix}/{rank}, ...) can never be parsed as MiniMessage markup - it always
+    // renders as inert literal text, no matter what it contains.
+    private String applyPlaceholdersSafely(String raw, Map<String, String> placeholders) {
+        if (placeholders == null || placeholders.isEmpty()) {
+            return raw;
+        }
+        String result = raw;
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            String value = entry.getValue();
+            String safeValue = value == null ? "" : miniMessage.escapeTags(value);
+            result = result.replace("{" + entry.getKey() + "}", safeValue);
+        }
+        return result;
+    }
+
     private String convertLegacyToMiniMessage(String input) {
         if (input == null || input.isEmpty()) {
             return "";
@@ -168,13 +185,18 @@ public class MessageManager {
         return format(raw, placeholders, null);
     }
 
+    // Order matters: PAPI and our own &/hex legacy codes are resolved on the
+    // admin-authored template first. Only THEN are our own {placeholder} values -
+    // which can carry player-controlled content such as nicknames or LuckPerms
+    // prefixes/suffixes - substituted in, pre-escaped via applyPlaceholdersSafely().
+    // That way a hostile display name (e.g. containing "<click:run_command:...>" or
+    // "&c") can never be parsed as real formatting/functionality; it always renders
+    // as plain text instead.
     public Component format(String raw, Map<String, String> placeholders, Player player) {
-        String withPlaceholders = applyPlaceholders(raw, placeholders);
-        if (player != null) {
-            withPlaceholders = plugin.getIntegrationManager().applyPlaceholderApi(player, withPlaceholders);
-        }
-        String miniMessageReady = convertLegacyToMiniMessage(withPlaceholders);
-        return miniMessage.deserialize(miniMessageReady);
+        String withPapi = player != null ? plugin.getIntegrationManager().applyPlaceholderApi(player, raw) : raw;
+        String legacyConverted = convertLegacyToMiniMessage(withPapi);
+        String withPlaceholders = applyPlaceholdersSafely(legacyConverted, placeholders);
+        return miniMessage.deserialize(withPlaceholders);
     }
 
     public String getFormattedRaw(String path, Map<String, String> placeholders) {

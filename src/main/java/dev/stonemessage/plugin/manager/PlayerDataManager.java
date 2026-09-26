@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,7 +48,7 @@ public class PlayerDataManager {
     }
 
     public boolean isFirstJoin(UUID uuid) {
-        return !data.contains(path(uuid, "last-seen"));
+        return !data.contains(path(uuid, "first-join"));
     }
 
     public long getDaysSinceLastSeen(UUID uuid) {
@@ -110,9 +113,23 @@ public class PlayerDataManager {
         writeToDisk(data.saveToString());
     }
 
+    // Writes to a temp file first, then atomically replaces the real file. A direct
+    // write would truncate dataFile immediately - if the process dies mid-write (crash,
+    // kill -9, disk full), the ENTIRE player database would be left corrupted/truncated
+    // and silently reset to empty on next load. Writing to a temp file first means a
+    // crash mid-write only loses this one unwritten batch, never the existing history.
     private void writeToDisk(String yaml) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(dataFile), StandardCharsets.UTF_8)) {
-            writer.write(yaml);
+        File tempFile = new File(dataFile.getParentFile(), FILE_NAME + ".tmp");
+        try {
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8)) {
+                writer.write(yaml);
+            }
+            try {
+                Files.move(tempFile.toPath(), dataFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException ex) {
+                Files.move(tempFile.toPath(), dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException ex) {
             plugin.getLogger().warning("Could not save " + FILE_NAME + ": " + ex.getMessage());
         }

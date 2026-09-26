@@ -36,7 +36,9 @@ public final class ConfigUpdater {
         }
     }
 
-    private static int mergeSection(ConfigurationSection defaults, ConfigurationSection current) {
+    // Package-visible (not private) so it can be unit-tested directly against plain
+    // YamlConfiguration objects, without needing a full plugin/server context.
+    static int mergeSection(ConfigurationSection defaults, ConfigurationSection current) {
         int added = 0;
         for (String key : defaults.getKeys(false)) {
             Object defaultValue = defaults.get(key);
