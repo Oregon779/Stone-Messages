@@ -15,7 +15,7 @@
 #
 # General command feedback (help, reload, errors, ...) is translated
 # per-language instead, in:
-#   plugins/Stone Message/languages/<language>/messages.yml
+#   plugins/StoneMessage/languages/<language>/messages.yml
 #
 # ---------------------------------------------------------------------
 # Available placeholders (usable in every message below):
@@ -33,7 +33,8 @@
 #   {last_seen_date}   - only in join messages: formatted date/time the
 #                         player was last online (see date-format below,
 #                         empty on a player's very first join)
-#   {first_join_date}  - formatted date/time this player first ever joined
+#   {first_join_date}  - only in join messages: formatted date/time this
+#                         player first ever joined
 #   {days_offline}     - only in join messages: full days since this player
 #                         was last online (0 if less than a day, first join
 #                         has no meaningful value and is best avoided there)
