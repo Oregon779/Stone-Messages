@@ -3,7 +3,12 @@ package dev.stonemessage.plugin.manager;
 import dev.stonemessage.plugin.StoneMessage;
 import dev.stonemessage.plugin.config.ConfigUpdater;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -43,6 +48,31 @@ public class MessageManager {
         LEGACY_TAGS.put('o', "italic");
         LEGACY_TAGS.put('r', "reset");
     }
+
+    // Placeholder values (nicknames, LuckPerms prefixes, ...) may carry pure styling,
+    // so colored ranks and nicknames keep working - but nothing interactive or
+    // content-producing (click, hover, insert, newline, selector, nbt, ...).
+    private static final TagResolver SAFE_VALUE_TAGS = TagResolver.resolver(
+            StandardTags.color(), StandardTags.decorations(), StandardTags.gradient(),
+            StandardTags.rainbow(), StandardTags.transition(), StandardTags.reset(),
+            StandardTags.pride(), StandardTags.shadowColor());
+
+    // Allowlist, not denylist: every tag name NOT in SAFE_VALUE_TAGS counts as "known"
+    // here, so escapeTags() neutralizes it - including tags added in future Adventure
+    // versions.
+    private static final MiniMessage UNSAFE_TAG_ESCAPER = MiniMessage.builder()
+            .tags(new TagResolver() {
+                @Override
+                public Tag resolve(String name, ArgumentQueue arguments, Context ctx) {
+                    return null;
+                }
+
+                @Override
+                public boolean has(String name) {
+                    return !SAFE_VALUE_TAGS.has(name);
+                }
+            })
+            .build();
 
     private final StoneMessage plugin;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
@@ -117,10 +147,9 @@ public class MessageManager {
         return result;
     }
 
-    // Same substitution as applyPlaceholders(), but each value is escaped first so
-    // dynamic, potentially player-controlled content (nicknames/{displayname}, LuckPerms
-    // {prefix}/{suffix}/{rank}, ...) can never be parsed as MiniMessage markup - it always
-    // renders as inert literal text, no matter what it contains.
+    // Same substitution as applyPlaceholders(), but each value's legacy codes are
+    // converted and every non-styling tag is escaped first, so a hostile nickname or
+    // prefix can color itself but never inject click/hover/insert functionality.
     private String applyPlaceholdersSafely(String raw, Map<String, String> placeholders) {
         if (placeholders == null || placeholders.isEmpty()) {
             return raw;
@@ -128,7 +157,7 @@ public class MessageManager {
         String result = raw;
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             String value = entry.getValue();
-            String safeValue = value == null ? "" : miniMessage.escapeTags(value);
+            String safeValue = value == null ? "" : UNSAFE_TAG_ESCAPER.escapeTags(convertLegacyToMiniMessage(value));
             result = result.replace("{" + entry.getKey() + "}", safeValue);
         }
         return result;
@@ -188,10 +217,8 @@ public class MessageManager {
     // Order matters: PAPI and our own &/hex legacy codes are resolved on the
     // admin-authored template first. Only THEN are our own {placeholder} values -
     // which can carry player-controlled content such as nicknames or LuckPerms
-    // prefixes/suffixes - substituted in, pre-escaped via applyPlaceholdersSafely().
-    // That way a hostile display name (e.g. containing "<click:run_command:...>" or
-    // "&c") can never be parsed as real formatting/functionality; it always renders
-    // as plain text instead.
+    // prefixes/suffixes - substituted in via applyPlaceholdersSafely(), which keeps
+    // their colors but escapes anything interactive (e.g. "<click:run_command:...>").
     public Component format(String raw, Map<String, String> placeholders, Player player) {
         String withPapi = player != null ? plugin.getIntegrationManager().applyPlaceholderApi(player, raw) : raw;
         String legacyConverted = convertLegacyToMiniMessage(withPapi);
