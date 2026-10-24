@@ -56,6 +56,10 @@
 # values you changed are never overwritten, even in nested sections.
 # =====================================================================
 
+# Layout version of this file, used to migrate it automatically when an
+# update renames or moves options. Do not change this value.
+config-version: 1
+
 # Language used for general command feedback. Must match a folder under
 # languages/ - "en" and "de" ship by default. New installs always default
 # to English until an admin changes this.

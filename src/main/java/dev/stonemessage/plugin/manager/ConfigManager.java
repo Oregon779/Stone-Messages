@@ -12,6 +12,13 @@ import java.util.List;
 public class ConfigManager {
     private static final String RESOURCE_PATH = "config.yml";
 
+    // Steps that bring an older config.yml up to the bundled "config-version". Options
+    // that are merely NEW need no entry here - they are added from the bundled
+    // config.yml automatically. Only when a release renames, moves or removes options:
+    // bump config-version in the bundled config.yml and add a step, e.g.
+    //   new ConfigUpdater.Migration(2, c -> ConfigUpdater.moveKey(c, "join.notification", "join.display"))
+    private static final List<ConfigUpdater.Migration> MIGRATIONS = List.of();
+
     private final StoneMessage plugin;
     private File configFile;
     private YamlConfiguration config;
@@ -27,9 +34,17 @@ public class ConfigManager {
         }
 
         try {
-            ConfigUpdater.UpdateResult result = ConfigUpdater.update(plugin, RESOURCE_PATH, configFile);
+            ConfigUpdater.UpdateResult result = ConfigUpdater.update(plugin, RESOURCE_PATH, configFile, MIGRATIONS);
+            if (result.fromVersion() != result.toVersion()) {
+                plugin.getLogger().info("Migrated config.yml from config-version " + result.fromVersion() + " to "
+                        + result.toVersion() + (result.backup() != null ? " (backup: " + result.backup().getFileName() + ")" : ""));
+            }
             if (result.addedKeys() > 0) {
                 plugin.getLogger().info("Added " + result.addedKeys() + " new option(s) to config.yml");
+            }
+            if (result.fileNewerThanPlugin()) {
+                plugin.getLogger().warning("config.yml was written by a newer Stone Message version (config-version "
+                        + result.fromVersion() + "). It was not migrated - some options may not be recognized.");
             }
         } catch (IOException ex) {
             plugin.getLogger().warning("Failed to update config.yml: " + ex.getMessage());

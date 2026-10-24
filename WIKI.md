@@ -103,6 +103,7 @@ Update-Hinweise bekommt jeder, der **OP ist oder** `stonemessage.admin` hat. Üb
 
 | Schlüssel | Standard | Bedeutung |
 |---|---|---|
+| `config-version` | `1` | Wird vom Plugin verwaltet – nicht ändern (siehe unten). |
 | `language` | `en` | Sprache der Befehls-/Systemtexte. Muss einem Ordner unter `languages/` entsprechen (`en`, `de` oder eigene). |
 | `date-format` | `dd.MM.yyyy HH:mm` | Format für `{last_seen_date}` und `{first_join_date}` ([SimpleDateFormat](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/SimpleDateFormat.html)). Ungültig → Warnung in der Konsole und Standardformat. |
 | `join.enabled` | `true` | `false` = gar keine Join-Nachricht (auch keine Erstbeitritt-Nachricht). |
@@ -125,7 +126,12 @@ Update-Hinweise bekommt jeder, der **OP ist oder** `stonemessage.admin` hat. Üb
 
 - Pro Nachricht bleiben **alle** Kanal-Texte gespeichert (`chat`, `actionbar`, `title`, `subtitle`). `notification` wählt nur aus, welcher angezeigt wird – so kann man jederzeit umschalten, ohne Texte neu zu schreiben.
 - Nachrichten gehen an **alle** Online-Spieler, inklusive des Spielers, der gerade joint.
-- Fehlende Schlüssel werden beim Start automatisch ergänzt (auch in verschachtelten Abschnitten). Eigene Werte werden **nie** überschrieben. Kommentare in einer bestehenden Datei werden dabei nicht aktualisiert.
+- **Automatische Aktualisierung** bei jedem Start und bei `/stonemessage reload`, bevor die Werte eingelesen werden:
+  - Neue Optionen werden mit Standardwert **und** Erklär-Kommentar an ihrer richtigen Stelle ergänzt, auch in verschachtelten Abschnitten.
+  - Eigene Werte und eigene Kommentare werden **nie** überschrieben. Optionen, die das Plugin nicht kennt, bleiben erhalten.
+  - Die Datei wird nur geschrieben, wenn sich wirklich etwas ändert. Paper schreibt dabei `"…"` als `'…'` – der Wert bleibt gleich.
+- `config-version` gehört dem Plugin, bitte nicht ändern. Benennt ein Update Optionen um oder verschiebt sie, wird die Datei anhand dieser Nummer migriert. Vorher wird ein Backup `config.yml.v<alte Version>.bak` angelegt.
+- Enthält die `config.yml` einen YAML-Syntaxfehler, wird sie **nicht** angefasst. Die Konsole meldet den Fehler, das Plugin läuft bis zur Korrektur mit Standardwerten.
 
 ### Beispiel: Join als Title, Leave in der Actionbar
 
@@ -393,6 +399,8 @@ Die Tests laufen ohne Minecraft-Server. MockBukkit wird derzeit nicht verwendet,
 
 ### Unveröffentlicht
 
+- **Config-Updates:** Neue Optionen kommen jetzt mit ihrem Erklär-Kommentar und an ihrer richtigen Position in die bestehende `config.yml`. Neu ist eine versionierte Migration (`config-version`) mit automatischem Backup.
+- **Fix:** Eine `config.yml` mit YAML-Syntaxfehler wurde beim Update komplett durch die Standardwerte ersetzt. Jetzt bleibt sie unangetastet.
 - **Portierung** auf Paper API 26.2 und Java 25 (`api-version: '26.2'`). Keine Code-Änderungen dafür nötig.
 - **Sicherheit:** Platzhalter-Werte (z. B. Nicknames) konnten klickbare Befehle, Hover-Texte o. Ä. in Join-/Leave-Nachrichten einschleusen. Jetzt sind in Werten nur noch Farben und Formatierung erlaubt.
 - **Fix:** Nach einem Serverabsturz bekamen Spieler, die seit ihrem ersten Join nicht regulär ausgeloggt waren, die Erstbeitritt-Nachricht erneut.
