@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +31,9 @@ public class PlayerDataManager {
     // thread. Now a mutation just flips this flag; the actual write happens on a
     // periodic async task (see flushIfDirty()).
     private final AtomicBoolean dirty = new AtomicBoolean(false);
+
+    // When each online player's current session started; in memory only, cleared on quit.
+    private final Map<UUID, Long> sessionStarts = new HashMap<>();
 
     public PlayerDataManager(StoneMessage plugin) {
         this.plugin = plugin;
@@ -49,6 +54,25 @@ public class PlayerDataManager {
 
     public boolean isFirstJoin(UUID uuid) {
         return !data.contains(path(uuid, "first-join"));
+    }
+
+    public void startSession(UUID uuid) {
+        sessionStarts.put(uuid, System.currentTimeMillis());
+    }
+
+    public void endSession(UUID uuid) {
+        sessionStarts.remove(uuid);
+    }
+
+    // 0 if no session was recorded (e.g. the plugin was enabled while the player was online).
+    public long getSessionMillis(UUID uuid) {
+        Long start = sessionStarts.get(uuid);
+        return start == null ? 0 : System.currentTimeMillis() - start;
+    }
+
+    // -1 if the player was never seen leaving before.
+    public long getMillisSinceLastSeen(UUID uuid) {
+        return getElapsedSinceLastSeen(uuid);
     }
 
     public long getDaysSinceLastSeen(UUID uuid) {

@@ -25,12 +25,15 @@ public class JoinListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         boolean firstJoin = plugin.getPlayerDataManager().isFirstJoin(uuid);
-
-        if (!plugin.getConfigManager().getBoolean("join.enabled", true)) {
-            return;
-        }
+        plugin.getPlayerDataManager().startSession(uuid);
+        plugin.getPlaceholderManager().countIfNewPlayer(player);
+        boolean joinedVanished = plugin.getVanishManager().trackJoin(player);
 
         Map<String, String> placeholders = plugin.getPlaceholderManager().buildJoinPlaceholders(player);
-        plugin.getNotificationManager().broadcastJoin(player, placeholders, firstJoin);
+        if (plugin.getConfigManager().getBoolean("join.enabled", true) && !joinedVanished) {
+            plugin.getNotificationManager().broadcastJoin(player, placeholders, firstJoin);
+        }
+        // Only the joining player sees this, so it's sent even when they joined vanished.
+        plugin.getNotificationManager().sendPrivateJoin(player, placeholders, firstJoin);
     }
 }

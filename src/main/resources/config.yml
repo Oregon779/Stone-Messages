@@ -24,7 +24,8 @@
 #   {uuid}             - the player's UUID
 #   {world}            - the world the player is in
 #   {x} {y} {z}        - the player's block coordinates
-#   {online}           - players currently online
+#   {online}           - players currently online (vanished players aren't
+#                         counted, see "vanish" below)
 #   {max}              - the server's player slot limit
 #   {ping}             - the player's current ping in milliseconds
 #   {gamemode}         - the player's current game mode (SURVIVAL, CREATIVE, ...)
@@ -46,6 +47,18 @@
 #                         isn't installed)
 #   {rank}             - the player's primary LuckPerms group, e.g. "admin"
 #                         (empty if LuckPerms isn't installed)
+#   {level}            - the player's XP level
+#   {playtime}         - total time played on this server, e.g. "2d 3h 15m"
+#   {date}             - the current date/time (see date-format below)
+#   {join_count}       - only in join messages: how often this player has
+#                         joined, this join included (1 on a first join)
+#   {unique_players}   - only in join messages: how many different players
+#                         have ever joined - on a first join that is the new
+#                         player's number, e.g. "You are player #{unique_players}"
+#   {time_offline}     - only in join messages: time since last online,
+#                         e.g. "3d 4h" (empty on a first join)
+#   {session_time}     - only in leave messages: how long the player was
+#                         online this time, e.g. "1h 20m"
 #
 # If PlaceholderAPI is installed, any %placeholder% (LuckPerms, Vault, or
 # any other expansion you have) also works directly in every message below -
@@ -65,7 +78,7 @@ config-version: 1
 # to English until an admin changes this.
 language: en
 
-# Pattern used to render {last_seen_date} and {first_join_date}, following
+# Pattern used to render {last_seen_date}, {first_join_date} and {date}, following
 # Java's SimpleDateFormat syntax (e.g. "dd.MM.yyyy HH:mm" -> 28.07.2026 14:05).
 date-format: "dd.MM.yyyy HH:mm"
 
@@ -86,6 +99,20 @@ join:
     title: "&a&l{player}"
     subtitle: "&7joined the game"
 
+  # A private message from the server that ONLY the joining player sees, in
+  # addition to the public message above. Has its own channel, and "chat"
+  # may also be a list to send several lines.
+  private:
+    enabled: false
+    notification: CHAT
+    messages:
+      chat:
+        - "&7Welcome back, &f{player}&7! This is visit &f#{join_count}&7."
+        - "&7You were away for &f{time_offline}&7 - total playtime: &f{playtime}"
+      actionbar: "&7Welcome back, &f{player}&7!"
+      title: "&a&lWelcome back"
+      subtitle: "&7You were away for {time_offline}"
+
   # A separate, one-time message shown the very first time a player ever
   # joins the server - great for a personal welcome. Uses the same
   # notification channel as above (join.notification).
@@ -96,6 +123,19 @@ join:
       actionbar: "&e★ Welcome, {player}!"
       title: "&e&lWelcome!"
       subtitle: "&7{player}, enjoy your stay"
+
+    # Private message for the very first join only. If disabled, a first
+    # join gets the normal private message above (if that one is enabled).
+    private:
+      enabled: false
+      notification: TITLE
+      messages:
+        chat:
+          - "&eWelcome to the server, &f{player}&e!"
+          - "&7You are player &f#{unique_players}&7 - have fun!"
+        actionbar: "&e★ You are player #{unique_players}!"
+        title: "&e&lWelcome!"
+        subtitle: "&7You are player #{unique_players}"
 
 # ---------- LEAVE ----------
 leave:
@@ -111,6 +151,22 @@ leave:
     actionbar: "&c➜ {player} left the game"
     title: "&c&l{player}"
     subtitle: "&7left the game"
+
+# ---------- VANISH ----------
+# Works with vanish plugins that set the common "vanished" player metadata
+# (SuperVanish, PremiumVanish, EssentialsX and most others).
+vanish:
+  # Players who join or leave while vanished get no join/leave message, and
+  # {online} doesn't count vanished players.
+  enabled: true
+  # Going into vanish while online shows the normal leave message, as if the
+  # player had left.
+  fake-leave-on-vanish: true
+  # Coming out of vanish shows the normal join message, as if the player had
+  # just joined.
+  fake-join-on-unvanish: true
+  # How often vanish changes are checked (20 ticks = 1 second).
+  check-interval-ticks: 10
 
 # Shared Title timing, used whenever a "notification" above is TITLE.
 title-timing:

@@ -7,7 +7,9 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NotificationManager {
@@ -29,6 +31,19 @@ public class NotificationManager {
         broadcast("leave", type, placeholders, subject, plugin.getServer().getOnlinePlayers());
     }
 
+    // Shown only to the joining player. On a first join the first-join variant wins if it
+    // is enabled, otherwise the normal one is used - same rule as for the public message.
+    public void sendPrivateJoin(Player subject, Map<String, String> placeholders, boolean firstJoin) {
+        ConfigManager cfg = plugin.getConfigManager();
+        String section = firstJoin && cfg.getBoolean("join.first-join.private.enabled", false)
+                ? "join.first-join.private" : "join.private";
+        if (!cfg.getBoolean(section + ".enabled", false)) {
+            return;
+        }
+        MessageDisplayType type = MessageDisplayType.fromConfig(cfg.getString(section + ".notification", "CHAT"), MessageDisplayType.CHAT);
+        broadcast(section, type, placeholders, subject, List.of(subject));
+    }
+
     // Every recipient sees the exact same text - PlaceholderAPI is resolved against
     // "subject" (the player who joined/left), not the viewer, and our own {placeholder}
     // map is already fixed for this event. So the message only needs to be built ONCE
@@ -42,9 +57,17 @@ public class NotificationManager {
 
         switch (type) {
             case CHAT -> {
-                Component msg = mm.format(cfg.getString(section + ".messages.chat", ""), placeholders, subject);
+                // "chat" may be a single line or a list of lines.
+                String path = section + ".messages.chat";
+                List<String> lines = cfg.isList(path) ? cfg.getStringList(path) : List.of(cfg.getString(path, ""));
+                List<Component> messages = new ArrayList<>(lines.size());
+                for (String line : lines) {
+                    messages.add(mm.format(line, placeholders, subject));
+                }
                 for (Player recipient : recipients) {
-                    recipient.sendMessage(msg);
+                    for (Component msg : messages) {
+                        recipient.sendMessage(msg);
+                    }
                 }
             }
             case ACTIONBAR -> {

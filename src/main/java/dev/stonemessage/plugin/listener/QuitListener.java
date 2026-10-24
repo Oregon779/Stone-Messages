@@ -23,12 +23,12 @@ public class QuitListener implements Listener {
 
         Player player = event.getPlayer();
         plugin.getPlayerDataManager().recordSeenNow(player.getUniqueId());
+        boolean leftVanished = plugin.getVanishManager().trackQuit(player);
 
-        if (!plugin.getConfigManager().getBoolean("leave.enabled", true)) {
-            return;
+        if (plugin.getConfigManager().getBoolean("leave.enabled", true) && !leftVanished) {
+            Map<String, String> placeholders = plugin.getPlaceholderManager().buildLeavePlaceholders(player);
+            plugin.getNotificationManager().broadcastLeave(player, placeholders);
         }
-
-        Map<String, String> placeholders = plugin.getPlaceholderManager().buildLeavePlaceholders(player);
-        plugin.getNotificationManager().broadcastLeave(player, placeholders);
+        plugin.getPlayerDataManager().endSession(player.getUniqueId());
     }
 }

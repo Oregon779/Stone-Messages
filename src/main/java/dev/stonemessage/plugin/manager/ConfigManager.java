@@ -77,6 +77,10 @@ public class ConfigManager {
         return config.getStringList(path);
     }
 
+    public boolean isList(String path) {
+        return config.isList(path);
+    }
+
     public String getLanguage() {
         return config.getString("language", "en");
     }

@@ -61,8 +61,10 @@ Kurzzeitig kann beim Speichern eine `playerdata.yml.tmp` auftauchen – das ist 
 | **Join-Nachrichten** | Ersetzen „*Spieler ist dem Spiel beigetreten*". Die Vanilla-Meldung wird **immer** ausgeblendet – auch wenn die eigene Nachricht deaktiviert ist. |
 | **Leave-Nachrichten** | Dasselbe für „*Spieler hat das Spiel verlassen*". |
 | **Erstbeitritt-Nachricht** | Eigener Begrüßungstext, der genau **einmal** beim allerersten Beitritt eines Spielers erscheint. |
+| **Private Nachricht** | Zusätzliche Nachricht, die **nur** der joinende Spieler sieht – getrennt für normalen Join und Erstbeitritt, mit eigenem Kanal und mehrzeilig. |
+| **Vanish-Support** | Joinen/Leaven im Vanish bleibt still; in Vanish gehen zeigt eine Leave-, wieder auftauchen eine Join-Nachricht. |
 | **3 Anzeige-Kanäle** | Pro Join/Leave wählbar: `CHAT`, `ACTIONBAR` oder `TITLE` (Title + Subtitle, Timing einstellbar). |
-| **Platzhalter** | 20 eigene `{platzhalter}` (Name, Welt, Koordinaten, Ping, TPS, Offline-Dauer, Rang …) plus alle `%platzhalter%` von PlaceholderAPI. |
+| **Platzhalter** | 27 eigene `{platzhalter}` (Name, Welt, Ping, Spielzeit, Besuchszahl, Offline-Dauer, Rang …) plus alle `%platzhalter%` von PlaceholderAPI. |
 | **Farben** | `&`-Codes, Hex-Farben (`&#FF00AA`) und MiniMessage (`<gradient:…>`) – beliebig kombinierbar. |
 | **LuckPerms** | `{prefix}`, `{suffix}` und `{rank}` direkt aus LuckPerms, inkl. Farben. |
 | **Mehrsprachig** | Befehls-/Systemtexte in Englisch und Deutsch, eigene Sprachen möglich. |
@@ -113,9 +115,19 @@ Update-Hinweise bekommt jeder, der **OP ist oder** `stonemessage.admin` hat. Üb
 | `join.messages.title` / `.subtitle` | *(Text)* | Title und Subtitle für den Title-Kanal. |
 | `join.first-join.enabled` | `true` | Eigene Nachricht beim allerersten Beitritt. `false` = auch beim ersten Mal die normale Join-Nachricht. |
 | `join.first-join.messages.*` | *(Text)* | Wie `join.messages.*`, nur für den Erstbeitritt. Nutzt denselben Kanal wie `join.notification`. |
+| `join.private.enabled` | `false` | Private Nachricht, die **nur** der joinende Spieler sieht – zusätzlich zur öffentlichen. |
+| `join.private.notification` | `CHAT` | Eigener Kanal für die private Nachricht: `CHAT`, `ACTIONBAR` oder `TITLE`. |
+| `join.private.messages.*` | *(Text)* | `chat`, `actionbar`, `title`, `subtitle`. `chat` darf eine **Liste** sein (mehrere Zeilen). |
+| `join.first-join.private.enabled` | `false` | Eigene private Nachricht nur beim Erstbeitritt. Ist sie aus, bekommt ein Erstbeitritt die normale private Nachricht (falls an). |
+| `join.first-join.private.notification` | `TITLE` | Kanal der privaten Erstbeitritt-Nachricht. |
+| `join.first-join.private.messages.*` | *(Text)* | Wie `join.private.messages.*`. |
 | `leave.enabled` | `true` | `false` = gar keine Leave-Nachricht. |
 | `leave.notification` | `CHAT` | `CHAT`, `ACTIONBAR` oder `TITLE`. |
 | `leave.messages.*` | *(Text)* | `chat`, `actionbar`, `title`, `subtitle` – wie bei Join. |
+| `vanish.enabled` | `true` | Kein Join/Leave für vanished Spieler, `{online}` zählt sie nicht mit. Siehe [Vanish-Plugins](#vanish-plugins). |
+| `vanish.fake-leave-on-vanish` | `true` | In Vanish gehen zeigt die normale Leave-Nachricht. |
+| `vanish.fake-join-on-unvanish` | `true` | Aus dem Vanish kommen zeigt die normale Join-Nachricht. |
+| `vanish.check-interval-ticks` | `10` | Wie oft Vanish-Wechsel geprüft werden (20 Ticks = 1 Sekunde). |
 | `title-timing.fade-in-ticks` | `5` | Einblenden (20 Ticks = 1 Sekunde). Gilt für Join und Leave. |
 | `title-timing.stay-ticks` | `40` | Anzeigedauer. |
 | `title-timing.fade-out-ticks` | `10` | Ausblenden. |
@@ -178,7 +190,7 @@ title-timing:
 | `{uuid}` | UUID des Spielers | ✅ | ✅ |
 | `{world}` | Name der Welt | ✅ | ✅ |
 | `{x}` `{y}` `{z}` | Block-Koordinaten | ✅ | ✅ |
-| `{online}` | Spieler online | ✅ | ✅ |
+| `{online}` | Spieler online (ohne vanished Spieler) | ✅ | ✅ |
 | `{max}` | Maximale Spielerzahl | ✅ | ✅ |
 | `{ping}` | Ping in ms | ✅ | ✅ |
 | `{gamemode}` | `SURVIVAL`, `CREATIVE`, `ADVENTURE`, `SPECTATOR` | ✅ | ✅ |
@@ -187,12 +199,21 @@ title-timing:
 | `{prefix}` | LuckPerms-Prefix (leer ohne LuckPerms) | ✅ | ✅ |
 | `{suffix}` | LuckPerms-Suffix (leer ohne LuckPerms) | ✅ | ✅ |
 | `{rank}` | Primäre LuckPerms-Gruppe, z. B. `admin` (leer ohne LuckPerms) | ✅ | ✅ |
+| `{level}` | XP-Level des Spielers | ✅ | ✅ |
+| `{playtime}` | Gesamte Spielzeit auf dem Server, z. B. `2d 3h 15m` | ✅ | ✅ |
+| `{date}` | Aktuelles Datum/Uhrzeit (Format aus `date-format`) | ✅ | ✅ |
 | `{first_join_date}` | Datum des allerersten Beitritts | ✅ | ❌ |
 | `{last_seen_date}` | Datum, wann der Spieler zuletzt online war | ✅ | ❌ |
 | `{days_offline}` | Volle Tage seit dem letzten Mal online | ✅ | ❌ |
 | `{hours_offline}` | Stunden seit dem letzten Mal online | ✅ | ❌ |
+| `{time_offline}` | Zeit seit dem letzten Mal online, z. B. `3d 4h` (leer beim Erstbeitritt) | ✅ | ❌ |
+| `{join_count}` | Wie oft der Spieler schon gejoint ist, dieser Join mitgezählt (`1` beim Erstbeitritt) | ✅ | ❌ |
+| `{unique_players}` | Wie viele verschiedene Spieler je gejoint sind – beim Erstbeitritt die Nummer des neuen Spielers | ✅ | ❌ |
+| `{session_time}` | Wie lange der Spieler diesmal online war, z. B. `1h 20m` | ❌ | ✅ |
 
-- Platzhalter mit ❌ werden in Leave-Nachrichten **nicht** ersetzt und erscheinen dort wörtlich.
+- Platzhalter mit ❌ werden in der jeweiligen Nachricht **nicht** ersetzt und erscheinen dort wörtlich.
+- `{join_count}` und `{playtime}` kommen aus den Vanilla-Statistiken des Servers und gelten daher auch für die Zeit vor der Installation von Stone Message. `{unique_players}` zählt alle Spieler, die der Server kennt.
+- Zeitangaben (`{playtime}`, `{time_offline}`, `{session_time}`) lassen Null-Teile weg, z. B. `2d 5m`; unter einer Minute ergibt `0m`.
 - Beim allerersten Join ist `{last_seen_date}` leer und `{days_offline}` / `{hours_offline}` sind `0`.
 - In **Leave**-Nachrichten zählt `{online}` den gehenden Spieler noch mit, weil Paper das Quit-Event auslöst, bevor der Spieler aus der Online-Liste entfernt wird.
 
@@ -288,6 +309,19 @@ players:
 - **Alles zurücksetzen:** Server stoppen, `playerdata.yml` löschen.
 
 ## Integrationen
+
+### Vanish-Plugins
+
+Stone Message erkennt vanished Spieler über die Spieler-Metadaten `vanished`. Diese setzen SuperVanish, PremiumVanish, EssentialsX und die meisten anderen Vanish-Plugins – eine zusätzliche Abhängigkeit ist nicht nötig.
+
+| Situation | Was passiert |
+|---|---|
+| Spieler joint im Vanish | **keine** Join-Nachricht (eine private Nachricht bekommt er trotzdem, die sieht nur er) |
+| Spieler geht online in Vanish | normale **Leave**-Nachricht, als wäre er gegangen (`fake-leave-on-vanish`) |
+| Spieler taucht wieder auf | normale **Join**-Nachricht, als wäre er gerade gejoint (`fake-join-on-unvanish`) |
+| Spieler leavt im Vanish | **keine** Leave-Nachricht |
+
+`{online}` zählt vanished Spieler nicht mit, sonst würde die Zahl sie verraten. Vanish-Wechsel werden alle `vanish.check-interval-ticks` geprüft (Standard: 0,5 Sekunden).
 
 ### LuckPerms
 
@@ -399,6 +433,10 @@ Die Tests laufen ohne Minecraft-Server. MockBukkit wird derzeit nicht verwendet,
 
 ### Unveröffentlicht
 
+- **Neu – Private Nachricht:** Der joinende Spieler bekommt auf Wunsch eine Nachricht, die nur er sieht – getrennt für normalen Join und Erstbeitritt, mit eigenem Kanal und mehrzeilig.
+- **Neu – Vanish-Support:** Kein Join/Leave für vanished Spieler; in Vanish gehen zeigt eine Leave-, wieder auftauchen eine Join-Nachricht. `{online}` zählt vanished Spieler nicht mit.
+- **Neu – 7 Platzhalter:** `{join_count}`, `{unique_players}`, `{playtime}`, `{session_time}`, `{time_offline}`, `{level}`, `{date}`.
+- Chat-Texte dürfen jetzt auch eine Liste mit mehreren Zeilen sein.
 - **Config-Updates:** Neue Optionen kommen jetzt mit ihrem Erklär-Kommentar und an ihrer richtigen Position in die bestehende `config.yml`. Neu ist eine versionierte Migration (`config-version`) mit automatischem Backup.
 - **Fix:** Eine `config.yml` mit YAML-Syntaxfehler wurde beim Update komplett durch die Standardwerte ersetzt. Jetzt bleibt sie unangetastet.
 - **Portierung** auf Paper API 26.2 und Java 25 (`api-version: '26.2'`). Keine Code-Änderungen dafür nötig.

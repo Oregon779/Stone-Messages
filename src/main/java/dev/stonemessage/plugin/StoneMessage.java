@@ -10,7 +10,9 @@ import dev.stonemessage.plugin.manager.NotificationManager;
 import dev.stonemessage.plugin.manager.PlaceholderManager;
 import dev.stonemessage.plugin.manager.PlayerDataManager;
 import dev.stonemessage.plugin.manager.UpdateChecker;
+import dev.stonemessage.plugin.manager.VanishManager;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.entity.Player;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -26,6 +28,7 @@ public final class StoneMessage extends JavaPlugin {
     private PlaceholderManager placeholderManager;
     private NotificationManager notificationManager;
     private UpdateChecker updateChecker;
+    private VanishManager vanishManager;
     private BukkitTask playerDataFlushTask;
 
     @Override
@@ -47,8 +50,15 @@ public final class StoneMessage extends JavaPlugin {
         integrationManager.setup();
 
         placeholderManager = new PlaceholderManager(this);
+        placeholderManager.countUniquePlayers();
         notificationManager = new NotificationManager(this);
         updateChecker = new UpdateChecker(this);
+        vanishManager = new VanishManager(this);
+        vanishManager.start();
+        // Players already online (plugin loaded late) get their session counted from now.
+        for (Player player : getServer().getOnlinePlayers()) {
+            playerDataManager.startSession(player.getUniqueId());
+        }
 
         getLogger().info("Registering commands...");
         registerCommands();
@@ -73,6 +83,9 @@ public final class StoneMessage extends JavaPlugin {
         if (updateChecker != null) {
             updateChecker.stop();
         }
+        if (vanishManager != null) {
+            vanishManager.stop();
+        }
         if (playerDataFlushTask != null) {
             playerDataFlushTask.cancel();
         }
@@ -88,6 +101,7 @@ public final class StoneMessage extends JavaPlugin {
         messageManager.load();
         integrationManager.setup();
         updateChecker.start();
+        vanishManager.start();
     }
 
     private void registerCommands() {
@@ -129,5 +143,9 @@ public final class StoneMessage extends JavaPlugin {
 
     public UpdateChecker getUpdateChecker() {
         return updateChecker;
+    }
+
+    public VanishManager getVanishManager() {
+        return vanishManager;
     }
 }
