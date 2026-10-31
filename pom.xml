@@ -6,7 +6,7 @@
 
     <groupId>dev.stonemessage</groupId>
     <artifactId>stonemessage</artifactId>
-    <version>1.1.0-dev2</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>Stone Message</name>

@@ -4,7 +4,7 @@ Stone Message ersetzt die Vanilla-Join- und Leave-Nachrichten auf Paper-Servern 
 
 | | |
 |---|---|
-| **Version** | 1.0.0 |
+| **Version** | 1.1.0 |
 | **Server** | Paper 26.2 (`api-version: '26.2'`) |
 | **Java** | 25 |
 | **Folia** | nicht unterstützt |
@@ -34,7 +34,7 @@ Stone Message ersetzt die Vanilla-Join- und Leave-Nachrichten auf Paper-Servern 
 ## Installation
 
 1. Paper-Server **26.2** mit **Java 25** bereitstellen.
-2. `StoneMessage-1.0.0.jar` in den Ordner `plugins/` legen.
+2. `StoneMessage-1.1.0.jar` in den Ordner `plugins/` legen.
 3. *(Optional)* **LuckPerms** und/oder **PlaceholderAPI** installieren – beide werden automatisch erkannt und vor Stone Message geladen.
 4. Server starten. Stone Message legt beim ersten Start alle Dateien an (siehe unten).
 5. `config.yml` anpassen und mit `/stonemessage reload` übernehmen – kein Neustart nötig.
@@ -385,7 +385,7 @@ cd Stone-Messages
 mvn clean package
 ```
 
-Die fertige JAR liegt danach unter `target/StoneMessage-1.0.0.jar`. Die Tests laufen dabei automatisch mit; überspringen mit `-DskipTests`.
+Die fertige JAR liegt danach unter `target/StoneMessage-1.1.0.jar`. Die Tests laufen dabei automatisch mit; überspringen mit `-DskipTests`.
 
 **Abhängigkeiten** (alle `provided` – nichts davon wird in die JAR gepackt):
 
@@ -431,7 +431,7 @@ Die Tests laufen ohne Minecraft-Server. MockBukkit wird derzeit nicht verwendet,
 
 ## Changelog
 
-### Unveröffentlicht
+### 1.1.0
 
 - **Neu – Private Nachricht:** Der joinende Spieler bekommt auf Wunsch eine Nachricht, die nur er sieht – getrennt für normalen Join und Erstbeitritt, mit eigenem Kanal und mehrzeilig.
 - **Neu – Vanish-Support:** Kein Join/Leave für vanished Spieler; in Vanish gehen zeigt eine Leave-, wieder auftauchen eine Join-Nachricht. `{online}` zählt vanished Spieler nicht mit.
